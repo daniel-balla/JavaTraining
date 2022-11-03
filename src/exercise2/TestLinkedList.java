@@ -32,7 +32,7 @@ class TestLinkedList {
 	List<String> list;
 
 	private <T> List<T> getNewListInstance() {
-		return null;
+		return new LinkedList<T>();
 	}
 
 	@BeforeEach

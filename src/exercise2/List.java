@@ -36,7 +36,7 @@ public interface List<E> extends Iterable<E>{
      *         list does not permit null elements
      * (<a href="Collection.html#optional-restrictions">optional</a>)
      */
-    boolean contains(Object o);
+    boolean contains(E o);
 
     /**
      * Returns an iterator over the elements in this list in proper sequence.
@@ -91,7 +91,7 @@ public interface List<E> extends Iterable<E>{
      * @throws UnsupportedOperationException if the <tt>remove</tt> operation
      *         is not supported by this list
      */
-    boolean remove(Object o);
+    boolean remove(E o);
 
     /**
      * Removes all of the elements from this list (optional operation).
@@ -166,5 +166,5 @@ public interface List<E> extends Iterable<E>{
      *         list does not permit null elements
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      */
-    int indexOf(Object o);
+    int indexOf(E o);
 }

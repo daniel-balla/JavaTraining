@@ -1,27 +1,26 @@
 package exercise2;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class LinkedListIterator<E> implements Iterator<E> {
 
-	int size;
-	@SuppressWarnings("unchecked")
-	E[] arr = (E[]) new Object[size];
-	
-	public LinkedListIterator(E[] a) {
-		this.arr = a;
-	}
-	
+	Element<E> current;
+
 	@Override
 	public boolean hasNext() {
-		
-		return false;
+
+		return current != null;
 	}
 
 	@Override
 	public E next() {
-		// TODO Auto-generated method stub
-		return null;
+		if (current == null) {
+			throw new NoSuchElementException("NoSuchElementException");
+		}
+		E val = current.val;
+		current = current.next;
+		return val;
 	}
 
 }
