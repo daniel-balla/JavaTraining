@@ -9,14 +9,27 @@ public class Lambda implements LambdaProvider {
 
 	@Override
 	public <R> Function<Predicate<R>, List<R>> matchingElementsProvider(List<R> listToFilter) {
-		// TODO Auto-generated method stub
-		return null;
+		Function<Predicate<R>, List<R>> lambda;
+		lambda = a -> {
+			List<R> ret;
+			ret = listToFilter.stream().filter(a).toList();
+			return ret;
+		};
+		return lambda;
 	}
 
 	@Override
 	public <R> Consumer<Predicate<R>> removeMatchingElementsProvider(List<R> listToRemoveFrom) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		Consumer<Predicate<R>> lambda;
+		lambda = a -> {
+			List<R> ret;
+			ret = listToRemoveFrom.stream().filter(a.negate()).toList();
+			listToRemoveFrom.clear();
+			for (R r : ret) {
+				listToRemoveFrom.add(r);
+			}
+		};
 
+		return lambda;
+	}
 }

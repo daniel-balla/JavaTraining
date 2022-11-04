@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  */
 class TestLambdaProvider {
 	
-	private final LambdaProvider provider = null;
+	private final LambdaProvider provider = new Lambda();
 	/* No code modifications needed below */
 	@Test
 	void testMatchingElementsProvider() {
