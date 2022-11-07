@@ -10,4 +10,5 @@ module JavaTrainingSolution {
 	requires java.xml;
 	requires jdk.compiler;
 	requires org.junit.jupiter.api;
+	requires junit;
 }
