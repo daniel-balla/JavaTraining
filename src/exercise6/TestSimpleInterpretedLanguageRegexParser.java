@@ -10,7 +10,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import exercise6.MatchExpressions.MathExpression;
 import exercise6.ast.AstInterpreter;
+import exercise6.ast.Node;
 import exercise6.ast.SimpleAst;
 import exercise6.ast.nodes.CalculateNode;
 import exercise6.ast.nodes.PrintNode;
@@ -29,6 +31,7 @@ class TestSimpleInterpretedLanguageRegexParser {
 
 	private final Parser simpleLanguageParser = new ParserImp();
 	private final Tokenizer tokenizer = new Tokenizer();
+	private final ExpressionParser expressionParser = new ExpressionParser();
 
 	@Test
 	void testTokenizer() {
@@ -225,7 +228,7 @@ class TestSimpleInterpretedLanguageRegexParser {
 				.printMessageConsumer(message -> printMessages.add(message)).build();
 		astInterpreter.execute(ast);
 		assertEquals(1, printMessages.size());
-		assertEquals("3.0", printMessages.get(0));
+		assertEquals("3.001953125", printMessages.get(0));
 	}
 
 	@Test
@@ -289,6 +292,63 @@ class TestSimpleInterpretedLanguageRegexParser {
 		astInterpreter.execute(ast);
 		assertEquals("3.0", printMessages.get(3));
 	}
+	
+	@Test
+	void testExpressionParser() {
+		final String a = "2 * (3 + (4 * 5 + (6 * 7) * 8) - 9) * 10";
+		Node b = expressionParser.parse(a, null);
+		final String c = "((2.0 * ((3.0 + ((4.0 * 5.0) + ((6.0 * 7.0) * 8.0))) - 9.0)) * 10.0)";
+		assertEquals(c, b.toString());
+	}
+	
+	@Test
+	void testExpressionParserEvalPlus() {
+		final String a = "2+3";
+		Node b = expressionParser.parse(a, null);
+		double c = expressionParser.evalTree((MathExpression)b);
+		assertEquals(5, c);
+	}
+	
+	@Test
+	void testExpressionParserEvalMinus() {
+		final String a = "5-2";
+		Node b = expressionParser.parse(a, null);
+		double c = expressionParser.evalTree((MathExpression)b);
+		assertEquals(3, c);
+	}
+	
+	@Test
+	void testExpressionParserEvalMult() {
+		final String a = "2*3";
+		Node b = expressionParser.parse(a, null);
+		double c = expressionParser.evalTree((MathExpression)b);
+		assertEquals(6, c);
+	}
+	
+	@Test
+	void testExpressionParserEvalDiv() {
+		final String a = "6/2";
+		Node b = expressionParser.parse(a, null);
+		double c = expressionParser.evalTree((MathExpression)b);
+		assertEquals(3, c);
+	}
+	
+	@Test
+	void testExpressionParserEvalExpo() {
+		final String a = "2^2";
+		Node b = expressionParser.parse(a, null);
+		double c = expressionParser.evalTree((MathExpression)b);
+		assertEquals(4, c);
+	}
+	
+	@Test
+	void testExpressionParserEvalMixed() {
+		final String a = "2 * (3 + (4 * 5 + (6 * 7) * 8) - 9) * 10";
+		Node b = expressionParser.parse(a, null);
+		double c = expressionParser.evalTree((MathExpression)b);
+		assertEquals(7000, c);
+	}
+	
 }
 
 

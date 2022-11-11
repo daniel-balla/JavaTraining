@@ -6,12 +6,19 @@ package exercise6.ast;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import exercise6.ExpressionParser;
+import exercise6.MatchExpressions.MathExpression;
+import exercise6.MatchExpressions.nodes.DivideNode;
+import exercise6.MatchExpressions.nodes.ExponentNode;
+import exercise6.MatchExpressions.nodes.MinusNode;
+import exercise6.MatchExpressions.nodes.MultiplicationNode;
+import exercise6.MatchExpressions.nodes.PlusNode;
 import exercise6.ast.nodes.CalculateNode;
 import exercise6.ast.nodes.InputNode;
+import exercise6.ast.nodes.LiteralNode;
 import exercise6.ast.nodes.PrintNode;
 import exercise6.ast.nodes.PrintiNode;
 import exercise6.ast.nodes.VariableDeclarationNode;
@@ -43,6 +50,7 @@ public class AstInterpreter {
 
 	private void execute(final Node node, SimpleAst ast) {
 		/* New commands can be added below */
+		ExpressionParser expressionParser = new ExpressionParser();
 		if (node instanceof PrintNode) {
 			if (printMessageConsumer == null) {
 				throw new IllegalStateException("Please provide a print message consumer to use the PRINT statements.");
@@ -62,7 +70,8 @@ public class AstInterpreter {
 			if (printMessageConsumer == null) {
 				throw new IllegalStateException("Error");
 			}
-			((CalculateNode)node).value = calc(((CalculateNode) node), ast);
+			CalculateNode cN = (CalculateNode)node;
+			cN.value = evalTree((MathExpression) expressionParser.parse(cN.expression, ast));
 			printMessageConsumer.accept(Double.toString(((CalculateNode) node).value));
 		} else if (node instanceof VariableDeclarationNode) {
 			if (printMessageConsumer == null) {
@@ -98,96 +107,44 @@ public class AstInterpreter {
 		}
 	}
 
-	private double calc(CalculateNode node, SimpleAst ast) {
-		char[] tokens = node.expression.toCharArray();
-		Stack<Double> values = new Stack<Double>();
-		Stack<Character> ops = new Stack<Character>();
-		for (int i = 0; i < tokens.length; i++) {
-			if (tokens[i] == ' ') {
-				continue;
-			}
-			if (Character.isDigit(tokens[i])) {
-				StringBuilder number = new StringBuilder();
+	public double evalTree(MathExpression root) {
 
-				while (i < tokens.length && Character.isDigit(tokens[i])) {
-					number.append(tokens[i++]);
-				}
-				values.push(Double.parseDouble((number.toString())));
-				i--;
-			}
-			if (Character.isLetter(tokens[i])) {
-				StringBuilder variable = new StringBuilder();
-
-				while (i < tokens.length && Character.isLetter(tokens[i])) {
-					variable.append(tokens[i++]);
-				}
-				List<Node> nodes = ast.getNodes();
-				if (nodes.size() != 0) {
-					for (Node check : nodes) {
-						if (check instanceof VariableDeclarationNode) {
-							if (node.var != null) {
-								if (((VariableDeclarationNode) check).variable.equals(node.var)) {
-									node.var = null;
-									((VariableDeclarationNode) check).value = calc(node, ast);
-								}
-							} else if (((VariableDeclarationNode) check).variable.equals(variable.toString())) {
-								values.push(((VariableDeclarationNode) check).value);
-							}
-						}
-					}
-				}
-				i--;
-			} else if (tokens[i] == '(') {
-				ops.push(tokens[i]);
-			} else if (tokens[i] == ')') {
-				while (ops.peek() != '(') {
-					values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-				}
-				ops.pop();
-			} else if (tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/'
-					|| tokens[i] == '^') {
-				while (!ops.empty() && hasPrecedence(tokens[i], ops.peek())) {
-					values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-				}
-				ops.push(tokens[i]);
+		double leftEval, rightEval;
+		if (root == null) {
+			return 0;
+		}
+		if (root.left == null && root.right == null) {
+			return 0;
+		}
+		if (root.left instanceof MathExpression) {
+			 leftEval = evalTree((MathExpression)root.left);
+		} else {
+			if(root.left instanceof LiteralNode) {
+				 leftEval = ((LiteralNode)root.left).value;
+			} else {
+				 leftEval = ((VariableDeclarationNode)root.left).value;
 			}
 		}
-		while (!ops.empty()) {
-			values.push(applyOp(ops.pop(), values.pop(), values.pop()));
+		if (root.right instanceof MathExpression) {
+			 rightEval = evalTree((MathExpression)root.right);
+		} else {
+			if(root.right instanceof LiteralNode) {
+				 rightEval = ((LiteralNode)root.right).value;
+			} else {
+				 rightEval = ((VariableDeclarationNode)root.right).value;
+			}
 		}
-		double ret = (double) Math.round(values.pop() * 100d) / 100d;
-		return ret;
-	}
-
-	private boolean hasPrecedence(char op2, Character op1) {
-		if (op1 == '(' || op1 == ')') {
-			return false;
+		if(root.operator instanceof PlusNode) {
+			return leftEval + rightEval;
+		} else if(root.operator instanceof MinusNode) {
+			return leftEval - rightEval;
+		} else if(root.operator instanceof MultiplicationNode) {
+			return leftEval * rightEval;
+		} else if(root.operator instanceof DivideNode) {
+			return leftEval / rightEval; 
+		} else if(root.operator instanceof ExponentNode) {
+			return Math.pow(leftEval, rightEval);
 		}
-		if (op2 == '*' || op2 == '/' && op1 == '+' || op1 == '-') {
-			return false;
-		}
-		if (op2 == '^' && op1 == '*' || op1 == '/' || op1 == '+' || op1 == '-') {
-			return false;
-		} else
-			return true;
-	}
-
-	private Double applyOp(Character op, Double num2, Double num1) {
-		switch (op) {
-		case '+':
-			return num1 + num2;
-		case '-':
-			return num1 - num2;
-		case '*':
-			return num1 * num2;
-		case '/':
-			if (num2 == 0) {
-				throw new UnsupportedOperationException("Can't divide by 0");
-			} else
-				return num1 / num2;
-		case '^':
-			return (Double) Math.pow(num1, num2);
-		}
-		return 0.0;
+		return 0;
 	}
 }

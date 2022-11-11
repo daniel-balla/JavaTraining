@@ -19,4 +19,13 @@ public class LiteralNode extends ValueProviderNode {
 			}
 		}
 	}
+	
+	public LiteralNode(Double number) {
+		this.value = number;
+	}
+	
+	@Override
+	public String toString() {
+		return Double.toString(value);
+	}
 }
