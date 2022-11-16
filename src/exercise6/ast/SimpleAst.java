@@ -43,7 +43,14 @@ public class SimpleAst {
 			return false;
 		}
 		SimpleAst other = (SimpleAst) o;
-		return this.nodes.equals(other.nodes);
+		for(Node no : this.getNodes()) {
+			for(Node ne : other.getNodes()) {
+				if(!(no.equals(ne))) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 }

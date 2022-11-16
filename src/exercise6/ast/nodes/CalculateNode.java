@@ -1,12 +1,14 @@
 package exercise6.ast.nodes;
 
+import exercise6.ast.Node;
+
 /**
  * CALCULATE statement Node, defined as "CALCULATE " followed by the expression
  * to be evaluated
  */
 public class CalculateNode extends ValueProviderNode {
 
-	public String expression;
+	public Node expression;
 	public String var;
 	
 	/**
@@ -15,15 +17,16 @@ public class CalculateNode extends ValueProviderNode {
 	 * @param expression to be evaluated
 	 * @throws ScriptException
 	 */
-	public CalculateNode(String expression, String var) {
+	public CalculateNode(Node expression, String var) {
 		this.expression = expression;
 		this.var = var;
 	}
 	
 	@Override
 	public String toString() {
-		return expression;
+		return expression.toString();
 	}
+	
 	@Override
 	public boolean equals(Object o) {
 	if(this == o) {

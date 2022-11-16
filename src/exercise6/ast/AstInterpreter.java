@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import exercise6.ExpressionParser;
 import exercise6.MatchExpressions.MathExpression;
 import exercise6.MatchExpressions.nodes.DivideNode;
 import exercise6.MatchExpressions.nodes.ExponentNode;
@@ -50,7 +49,6 @@ public class AstInterpreter {
 
 	private void execute(final Node node, SimpleAst ast) {
 		/* New commands can be added below */
-		ExpressionParser expressionParser = new ExpressionParser();
 		if (node instanceof PrintNode) {
 			if (printMessageConsumer == null) {
 				throw new IllegalStateException("Please provide a print message consumer to use the PRINT statements.");
@@ -71,7 +69,7 @@ public class AstInterpreter {
 				throw new IllegalStateException("Error");
 			}
 			CalculateNode cN = (CalculateNode)node;
-			cN.value = evalTree((MathExpression) expressionParser.parse(cN.expression, ast));
+			cN.value = evalTree((MathExpression) cN.expression);
 			printMessageConsumer.accept(Double.toString(((CalculateNode) node).value));
 		} else if (node instanceof VariableDeclarationNode) {
 			if (printMessageConsumer == null) {

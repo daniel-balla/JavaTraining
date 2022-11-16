@@ -1,4 +1,4 @@
-package exercise6;
+package exercise6.Parser;
 
 import java.util.List;
 import java.util.Stack;
@@ -11,6 +11,8 @@ import exercise6.MatchExpressions.nodes.MinusNode;
 import exercise6.MatchExpressions.nodes.MultiplicationNode;
 import exercise6.MatchExpressions.nodes.PlusNode;
 import exercise6.MatchExpressions.nodes.RightParenthesis;
+import exercise6.Tokenizer.KeyWord;
+import exercise6.Tokenizer.Token;
 import exercise6.ast.Node;
 import exercise6.ast.SimpleAst;
 import exercise6.ast.nodes.LiteralNode;
@@ -18,20 +20,16 @@ import exercise6.ast.nodes.VariableDeclarationNode;
 
 public class ExpressionParser {
 
-	public Node parse(String input, SimpleAst ast) {
+	public Node parse(List<Token> input, SimpleAst ast) {
 		int curIndex = 0;
 		boolean afterOperand = false;
 		Stack<Node> operands = new Stack<>();
 		Stack<MathExpression> operators = new Stack<>();
-		while (curIndex < input.length()) {
-			int startIndex = curIndex;
-			char c = input.charAt(curIndex++);
+		while (curIndex < input.size()) {
+			Token c = input.get(curIndex++);
 
-			if (Character.isWhitespace(c)) {
-				continue;
-			}
 			if (afterOperand) {
-				if (c == ')') {
+				if (c.keyWord.equals(KeyWord.RightParenthesis)) {
 					MathExpression operator;
 					while (!operators.isEmpty() && (!((operator = operators.pop()) instanceof LeftParenthesis))) {
 						createNewOperand(operator, operands);
@@ -47,27 +45,19 @@ public class ExpressionParser {
 				operators.push(operator);
 				continue;
 			}
-			if (c == '(') {
+			if (c.keyWord.equals(KeyWord.LeftParenthesis)) {
 				operators.push(new LeftParenthesis());
 				continue;
 			}
 			afterOperand = true;
-			while (curIndex < input.length()) {
-				c = input.charAt(curIndex);
-				if (((c < '0') || (c > '9')) && (c != '.') && (c < 'a') || (c > 'z')) {
-					break;
-				}
-				curIndex++;
-			}
-			String in = input.substring(startIndex, curIndex);
-			if (Character.isDigit(in.charAt(0))) {
-				operands.push(new LiteralNode(Double.valueOf(input.substring(startIndex, curIndex))));
+			if (c.keyWord.equals(KeyWord.Integer)) {
+				operands.push(new LiteralNode(Double.valueOf(c.text)));
 			} else {
 				List<Node> nodes = ast.getNodes();
 				if (nodes.size() != 0) {
 					for (Node check : nodes) {
 						if (check instanceof VariableDeclarationNode) {
-							if (((VariableDeclarationNode) check).variable.equals(in)) {
+							if (((VariableDeclarationNode) check).variable.equals(c.text)) {
 								operands.push((VariableDeclarationNode) check);
 							}
 						}
@@ -129,22 +119,24 @@ public class ExpressionParser {
 		return -1;
 	}
 
-	public static MathExpression convert(char c) {
-		switch (c) {
-		case '+':
+	public static MathExpression convert(Token c) {
+		switch (c.keyWord) {
+		case Plus:
 			return new PlusNode();
-		case '-':
+		case Minus:
 			return new MinusNode();
-		case '*':
+		case Multiplication:
 			return new MultiplicationNode();
-		case '/':
+		case Divide:
 			return new DivideNode();
-		case '^':
+		case Exponent:
 			return new ExponentNode();
-		case '(':
+		case LeftParenthesis:
 			return new LeftParenthesis();
-		case ')':
+		case RightParenthesis:
 			return new RightParenthesis();
+		default:
+			break;
 		}
 		return null;
 	}
@@ -159,51 +151,34 @@ public class ExpressionParser {
 			return 0;
 		}
 		if (root.left instanceof MathExpression) {
-			 leftEval = evalTree((MathExpression)root.left);
+			leftEval = evalTree((MathExpression) root.left);
 		} else {
-			if(root.left instanceof LiteralNode) {
-				 leftEval = ((LiteralNode)root.left).value;
+			if (root.left instanceof LiteralNode) {
+				leftEval = ((LiteralNode) root.left).value;
 			} else {
-				 leftEval = ((VariableDeclarationNode)root.left).value;
+				leftEval = ((VariableDeclarationNode) root.left).value;
 			}
 		}
 		if (root.right instanceof MathExpression) {
-			 rightEval = evalTree((MathExpression)root.right);
+			rightEval = evalTree((MathExpression) root.right);
 		} else {
-			if(root.right instanceof LiteralNode) {
-				 rightEval = ((LiteralNode)root.right).value;
+			if (root.right instanceof LiteralNode) {
+				rightEval = ((LiteralNode) root.right).value;
 			} else {
-				 rightEval = ((VariableDeclarationNode)root.right).value;
+				rightEval = ((VariableDeclarationNode) root.right).value;
 			}
 		}
-		if(root.operator instanceof PlusNode) {
+		if (root.operator instanceof PlusNode) {
 			return leftEval + rightEval;
-		} else if(root.operator instanceof MinusNode) {
+		} else if (root.operator instanceof MinusNode) {
 			return leftEval - rightEval;
-		} else if(root.operator instanceof MultiplicationNode) {
+		} else if (root.operator instanceof MultiplicationNode) {
 			return leftEval * rightEval;
-		} else if(root.operator instanceof DivideNode) {
-			return leftEval / rightEval; 
-		} else if(root.operator instanceof ExponentNode) {
+		} else if (root.operator instanceof DivideNode) {
+			return leftEval / rightEval;
+		} else if (root.operator instanceof ExponentNode) {
 			return Math.pow(leftEval, rightEval);
 		}
 		return 0;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

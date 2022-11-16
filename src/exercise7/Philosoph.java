@@ -17,24 +17,24 @@ public class Philosoph extends Thread {
 			rightFork = temp;
 		}
 		if (leftFork.taken == true) {
-			System.out.println(getName() + " Waiting for left Fork");
+			System.out.println(getName() + " Waiting for left Fork " + leftFork.i);
 		}
 		try {
 			takeFork(leftFork);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		System.out.println(getName() + " Taking left Fork");
+		System.out.println(getName() + " Taking left Fork "  + leftFork.i);
 
 		if (rightFork.taken == true) {
-			System.out.println(getName() + " Waiting for right Fork");
+			System.out.println(getName() + " Waiting for right Fork " + rightFork.i);
 		}
 		try {
 			takeFork(rightFork);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		System.out.println(getName() + " Taking right Fork");
+		System.out.println(getName() + " Taking right Fork " + rightFork.i);
 		System.out.println(getName() + " Eating");
 
 		try {
@@ -42,7 +42,7 @@ public class Philosoph extends Thread {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println(getName() + " Eaten, putting forks back");
+		System.out.println(getName() + " Eaten, putting forks " + leftFork.i + " & " + rightFork.i + " back");
 
 		try {
 			putForkBack(leftFork);
