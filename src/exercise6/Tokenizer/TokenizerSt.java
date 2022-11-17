@@ -16,7 +16,7 @@ public class TokenizerSt {
 		return tokens;
 	}
 
-	public List<Token> createTokens(String str, List<Token> tokens) {
+	public static List<Token> createTokens(String str, List<Token> tokens) {
 		Set<String> commands = new HashSet<>();
 		commands.add("PRINT");
 		commands.add("PRINTI");
